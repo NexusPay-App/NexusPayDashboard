@@ -94,14 +94,20 @@
 
 
 require('dotenv').config();
+const cors = require('cors');
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const { fetchAllTransactions } = require('./fetchTransactions'); // Ensure path is correct
 const connectDB = require('./db'); // Ensure you have created this module
+const Transaction = require('./models/Transaction');
 const app = express();
 const port = 5000;
+
+// Enable CORS for all requests
+app.use(cors());
+
 
 // Schema definition
 const UserSchema = new mongoose.Schema({
@@ -166,6 +172,17 @@ app.get('/fetch-transactions', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+
+//API that fetches every transactions from mongo
+app.get('/transactions', async (req, res) => {
+  try {
+      const transactions = await Transaction.find(); // Fetch all transactions
+      res.json(transactions);
+  } catch (error) {
+      res.status(500).send(error.message);
+  }
+});
+
 
 // Schedule the transaction fetch to run every hour
 cron.schedule('0 * * * *', () => {

@@ -1,26 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/users')
-      .then(response => response.json())
-      .then(data => setUsers(data))
-      .catch(error => console.error('Error fetching users:', error));
+    axios.get('http://localhost:5000/users')
+      .then(response => {
+        setUsers(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching users:', error);
+        setError(error);
+      });
   }, []);
 
   return (
     <div>
       <h1>Users</h1>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>
-            <Link to={`/user/${user.id}`}>{user.phoneNumber}</Link>
-          </li>
-        ))}
-      </ul>
+      {error ? (
+        <p>Failed to load users: {error.message}</p>
+      ) : (
+        <>
+          <h2>Total Users: {users.length}</h2>
+          <ul>
+            {users.map(user => (
+              <li key={user.phoneNumber}>{user.phoneNumber}</li> // Using phoneNumber as key
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 };
